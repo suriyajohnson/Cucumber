@@ -15,20 +15,31 @@ pipeline {
             }
         }
 
-        stage('Execute Cucumber Tests') {
-            steps {
-                bat 'mvn clean test'
-            }
+      stage('Run Cucumber Tests') {
+         steps {
+        dir('CucumberJenkinsAutomation') {
+            bat 'mvn clean test'
         }
     }
-
-    post {
-        always {
-            junit allowEmptyResults: true,
-                  testResults: 'target/surefire-reports/TEST-*.xml'
-
-            archiveArtifacts artifacts: 'target/cucumber-report.html,target/cucumber.json',
-                             allowEmptyArchive: true
-        }
+}
     }
+
+   post {
+    always {
+        junit allowEmptyResults: true,
+              testResults: 'CucumberJenkinsAutomation/target/surefire-reports/TEST-*.xml'
+
+        archiveArtifacts artifacts: 'CucumberJenkinsAutomation/target/cucumber-report.html,CucumberJenkinsAutomation/target/cucumber.json',
+                         allowEmptyArchive: true
+
+        publishHTML(target: [
+            reportDir: 'CucumberJenkinsAutomation/target',
+            reportFiles: 'cucumber-report.html',
+            reportName: 'Cucumber HTML Report',
+            keepAll: true,
+            alwaysLinkToLastBuild: true,
+            allowMissing: true
+        ])
+    }
+}
 }
